@@ -1,0 +1,8 @@
+pro PgAdmin4
+
+log: admin@admin@email.cz
+pas: root
+
+pro databaze:
+
+pas: bds_postgres

@@ -1,0 +1,221 @@
+1)	♣ select rent_id, rent_start FROM car_service.car_was_rented
+2) 	♣ select clients.clients_id, clients.name, contact_info.phone_number FROM car_service.clients JOIN car_service.contact_info ON clients.clients_id = contact_info.clients_id;
+3)	♣ UPDATE car_service.roles SET role_type = 'administrator' WHERE role_type = 'director';
+	♣ INSERT INTO car_service.brands_support_numbers (brand, support_mail, support_number) VALUES ('Tesla', 'tesla_support_u@gmail.com', '+420318913323');
+	♣ DELETE FROM car_service.brands_support_numbers WHERE brands_support_numbers.support_number = '+420318913323';
+	♣ ALTER TABLE car_service.contact_info
+    		 ALTER COLUMN street TYPE varchar(68),
+    		 ALTER COLUMN postal_code TYPE varchar(11);
+4)	♣ SELECT * FROM car_service.payment_method WHERE payment_method.method = 'cash'
+	♣ SELECT 'name' LIKE 'n%'	                                                            //true
+	♣ SELECT 'name' NOT LIKE 'f%'	                                                            //true
+	♣ SELECT SUBSTRING ('PostgreSQL', 1, 7);	                                            //'Postgre'
+	♣ SELECT TRIM (LEADING FROM '           PostgreSQL TRIM')                                   // 'PostgreSQL TRIM'
+	♣ SELECT COUNT(clients_id) FROM car_service.clients
+	♣ SELECT MAX(cars_number) FROM car_service.cars
+	♣ SELECT MIN(rent_cost) FROM car_service.cars
+	♣ SELECT SUM(rent_cost) FROM car_service.cars
+	♣ SELECT AVG(rent_cost) FROM car_service.cars
+	♣ SELECT clients_id FROM car_service.clients GROUP BY clients_id
+	♣ SELECT 'VUT' AS result FROM car_service.cars HAVING MIN(rent_cost) < MAX(rent_cost)
+	♣ SELECT clients_id FROM car_service.clients GROUP BY clients_id HAVING clients_id > 50
+	♣ SELECT rent_cost FROM car_service.cars WHERE cars_id=7 GROUP BY rent_cost HAVING MAX(rent_cost)>50
+	♣ SELECT * FROM car_service.car_rent_info UNION SELECT * FROM car_service.client_rent_info
+	♣ SELECT * FROM car_service.car_rent_info UNION ALL SELECT * FROM car_service.client_rent_info
+	♣ SELECT DISTINCT clients.name FROM car_service.clients
+	♣ SELECT cars_id, rent_start FROM car_service.car_rent_info RIGHT JOIN car_service.car_was_rented ON cars_has_car_was_rented.rent_id = car_was_rented.rent_id
+	♣ SELECT cars_id, rent_end FROM car_service.car_rent_info  LEFT JOIN car_service.car_was_rented ON cars_has_car_was_rented.rent_id = car_was_rented.rent_id
+	♣ SELECT cars_id, rent_start, rent_end FROM car_service.car_rent_info  FULL OUTER JOIN car_service.car_was_rented ON cars_has_car_was_rented.rent_id = car_was_rented.rent_id
+5)	♣ SELECT DISTINCT cars_id, rent_start, rent_end FROM car_service.car_rent_info  
+		LEFT JOIN car_service.car_was_rented ON cars_has_car_was_rented.rent_id = car_was_rented.rent_id
+		GROUP BY cars_id, rent_start, rent_end
+		HAVING AVG(cars_id) > 10
+		ORDER BY rent_start DESC
+6)	♣ SELECT rent_start::timestamp AS startdate,
+    		(DATE_PART('hour',rent_start::timestamp)::integer) as horus
+    		FROM car_service.car_was_rented
+   		WHERE DATE_PART('Day',CURRENT_DATE::timestamp - rent_start::timestamp) < 1
+   		AND DATE_PART('hour',rent_start::timestamp) <= 36
+7) 	♣ SELECT * FROM car_service.car_was_rented WHERE rent_end >= '2021-11-01'::date and rent_end < '2021-12-01'::date+'1 month'::interval	
+8)	♣ SELECT * FROM car_service.clients WHERE lower(unaccent(clients.surname)) = lower('Růžička');
+9)	♣ SELECT * FROM car_service.cars ORDER BY cars_id,cars.rent_cost LIMIT 6 OFFSET 5
+10)	♣ SELECT cars_id, brand, model, rent_cost FROM car_service.cars
+		WHERE rent_cost > (SELECT AVG (rent_cost) FROM car_service.cars);
+11)	♣ SELECT cars_id, brand, model, rent_cost FROM car_service.cars
+		WHERE rent_cost > (SELECT AVG (rent_cost) FROM car_service.cars
+		WHERE cars_id > (SELECT AVG (cars_id) FROM car_service.cars))
+12)	♣ SELECT rent_cost, cars_id, brand, model FROM car_service.cars 
+		WHERE rent_cost > (SELECT AVG(rent_cost) FROM car_service.cars)
+		GROUP BY cars_id HAVING MAX(cars_id)>12
+13)	♣ SELECT
+	    	car_was_rented.rent_id,
+	    	car_was_rented.rent_start,
+	    	cars.cars_id,
+	    	cars.model,
+	   	clients.clients_id,
+		clients.surname,
+		roles.roles_id,
+		roles.role_type,
+		parking.parking_id,
+		parking.street,
+		parking.street_number,
+		payment_method.payment_id,
+		payment_method.method
+	FROM car_service.car_was_rented
+	INNER JOIN
+    		car_service.cars 
+	ON
+    		car_was_rented.rent_id = cars.cars_id
+	INNER JOIN
+		car_service.clients	
+	ON
+		car_was_rented.rent_id = clients.clients_id	
+	INNER JOIN
+    		car_service.roles 
+	ON
+    		car_was_rented.rent_id = roles.roles_id	
+	INNER JOIN
+    		car_service.parking 
+	ON
+    		car_was_rented.rent_id = parking.parking_id
+	INNER JOIN
+    		car_service.payment_method 
+	ON
+    		car_was_rented.rent_id = payment_method.payment_id
+14)	♣ SELECT
+   		car_was_rented.rent_id,
+		car_was_rented.rent_start,
+   		cars.cars_id,
+  		cars.model,
+		clients.clients_id,
+		clients.surname,
+		roles.roles_id,
+		roles.role_type
+	FROM car_service.car_was_rented
+	INNER JOIN
+    		car_service.cars 
+	ON
+    		car_was_rented.rent_id = cars.cars_id	
+	INNER JOIN
+		car_service.clients	
+	ON
+		car_was_rented.rent_id = clients.clients_id	
+	INNER JOIN
+    		car_service.roles 
+	ON
+    		car_was_rented.rent_id = roles.roles_id	
+	WHERE cars_id !=10
+	GROUP BY cars_id, rent_id, clients_id, roles_id HAVING clients_id < 15
+
+15)	♣ SELECT
+		car_was_rented.rent_id,
+	    car_was_rented.rent_start,
+	    cars.cars_id,
+	    cars.model,
+	   	clients.clients_id,
+		clients.surname,
+		roles.roles_id,
+		roles.role_type,
+		parking.parking_id,
+		parking.street,
+		parking.street_number,
+		payment_method.payment_id,
+		payment_method.method
+	FROM car_service.car_was_rented
+	INNER JOIN
+    		car_service.cars 
+	ON
+    		car_was_rented.rent_id = cars.cars_id
+	INNER JOIN
+		car_service.clients	
+	ON
+		car_was_rented.rent_id = clients.clients_id	
+	INNER JOIN
+    		car_service.roles 
+	ON
+    		car_was_rented.rent_id = roles.roles_id	
+	INNER JOIN
+    		car_service.parking 
+	ON
+    		car_was_rented.rent_id = parking.parking_id
+	INNER JOIN
+    		car_service.payment_method 
+	ON
+    		car_was_rented.rent_id = payment_method.payment_id
+	WHERE rent_cost > (SELECT AVG(rent_cost) FROM car_service.cars)
+	GROUP BY cars_id, rent_id, clients_id, roles_id, parking_id, payment_id HAVING clients_id < 10
+
+
+// 
+
+A materialized look at the database allows us to see it as a whole, 
+to get the most complete information about the client / car / rental. 
+However, my project database is quite small so that it is possible to get a large amount of information from it. 
+I have compiled a request for all the requirements
+
+//
+
+16)	♣ CREATE PROCEDURE insert_data(a varchar, b varchar, c varchar)
+	LANGUAGE SQL
+	AS $$
+	INSERT INTO car_service.brands_support_numbers VALUES (a);
+	INSERT INTO car_service.brands_support_numbers  VALUES (b);
+	INSERT INTO car_service.brands_support_numbers  VALUES (c);
+	$$;
+
+	CALL insert_data('bugatti', 'Land Cruiser', 'Tesla');
+
+17)	♣ CREATE TRIGGER view_data_insertion
+	BEFORE UPDATE ON car_service.brands_support_numbers
+	FOR EACH ROW
+   	EXECUTE PROCEDURE insert_data();
+
+18)	♣ CREATE VIEW volvos AS
+    	SELECT *
+   	FROM car_service.brands_support_numbers
+    	WHERE brand = 'Volvo';
+
+19)	♣ CREATE ROLE teacher
+	NOSUPERUSER 
+	LOGIN 
+	PASSWORD 'teacher';
+
+	GRANT SELECT, UPDATE, INSERT, DELETE ON 
+	car_service.brands_support_numbers,
+	car_service.car_was_rented,
+	car_service.cars,
+	car_service.car_rent_info,
+	car_service.clients,
+	car_service.client_rent_info,
+	car_service.clients_has_payment_method,
+	car_service.clients_has_roles,
+	car_service.contact_info,
+	car_service.parking,
+	car_service.payment_method,
+	car_service.roles
+	TO teacher;
+
+	GRANT SELECT(brand,support_mail), UPDATE(brand,support_mail), INSERT(brand,support_mail), DELETE ON 
+	car_service.brands_support_numbers
+	TO teacher;
+
+	CREATE ROLE student
+	NOSUPERUSER 
+	LOGIN 
+	PASSWORD 'student';
+
+	GRANT SELECT ON 
+	car_service.brands_support_numbers,
+	car_service.car_was_rented,
+	car_service.car_rent_info,
+	car_service.clients,
+	car_service.clients_has_roles,
+	car_service.contact_info,
+	car_service.parking,
+	car_service.payment_method,
+	car_service.roles
+	TO student;
+
+	GRANT SELECT(clients_id,phone_number) ON 
+	car_service.contact_info
+	TO student;
